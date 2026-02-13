@@ -2,7 +2,6 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { drizzle } from 'drizzle-orm/d1'
 import { debts } from './db/schema'
-import { eq } from 'drizzle-orm'
 
 type Bindings = {
   DB: D1Database
