@@ -7,7 +7,8 @@
 		{
 			"binding": "owe_manager_db",
 			"database_name": "owe-manager-db",
-			"database_id": "b8b3b926-d151-4a86-a958-25ea5d00e28b"
+			"database_id": "b8b3b926-d151-4a86-a958-25ea5d00e28b",
+			"migrations_dir": "migrations"
 		}
 	]
 	// "compatibility_flags": [
