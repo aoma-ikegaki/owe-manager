@@ -49,31 +49,31 @@ export default function OweManager() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div>
-      <h1>Owe Manager</h1>
+    <div className="max-w-xl mx-auto ">
+      <h1 className="text-3xl font-bold text-center">Owe Manager</h1>
 
-      <form onSubmit={handleSubmit}>
-        <h2>新規登録</h2>
-        <div>
-          <input type="text" placeholder='何のお金？' value={title} onChange={(e) => setTitle(e.target.value)} required />
-          <input type="number" placeholder='金額' value={amount} onChange={(e) => setAmount(e.target.value)} required />
-          <input type="text" placeholder='貸主' value={creditor} onChange={(e) => setCreditor(e.target.value)} required />
-          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
-          <button type="submit">登録</button>
+      <form onSubmit={handleSubmit} className="p-6 bg-gray-50 rounded-xl space-y-4 shadow-sm my-6">
+        <h2 className="font-bold text-gray-sm uppercase">新規登録</h2>
+        <div className="grid grid-cols-1 gap-3">
+          <input className="border p-2 rounded" type="text" placeholder='何のお金？' value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <input className="border p-2 rounded" type="number" placeholder='金額' value={amount} onChange={(e) => setAmount(e.target.value)} required />
+          <input className="border p-2 rounded" type="text" placeholder='貸主' value={creditor} onChange={(e) => setCreditor(e.target.value)} required />
+          <input className="border p-2 rounded" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <button className="bg-blue-500 text-white px-4 py-2 font-bold rounded hover:bg-blue-600 transition-colors shadow" type="submit">登録</button>
         </div>
       </form>
 
-      <div>
-        <h2>未返済リスト</h2>
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold border-b pb-2">未返済リスト</h2>
         {debts.length === 0 ? (
-          <p>現在、借金はありません！</p>
+          <p className="text-center">現在、借金はありません！</p>
         ) : (
           debts.map((debt) => (
-            <div key={debt.id}>
+            <div key={debt.id} className="p-4 border rounded-lg shadow-sm flex justify-between items-center">
               <div>
-                <p>{debt.title}</p>
-                <p>金額： {debt.amount}円</p>
-                <p>貸主： {debt.creditor} / 期限： {debt.dueDate || '未設定'}</p>
+                <p className="font-bold text-gray-900">{debt.title}</p>
+                <p className="text-xl font-bold">金額： <span className="text-red-500">{debt.amount}円</span></p>
+                <p className="text-sm text-gray-500">貸主： {debt.creditor}さん/ 期限： {debt.dueDate || '未設定'}</p>
               </div>
             </div>
           ))
