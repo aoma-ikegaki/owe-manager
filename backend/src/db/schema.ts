@@ -5,7 +5,7 @@ export const debts = sqliteTable('debts', {
   title: text('title').notNull(),
   amount: integer('amount').notNull(),
   creditor: text('creditor').notNull(),
-  dueDate: text('du_date').notNull(),
+  dueDate: text('du_date'),
   status: text('status', { enum: ['unpaid', 'paid', 'overdue'] })
   .notNull()
   .default('unpaid'),
