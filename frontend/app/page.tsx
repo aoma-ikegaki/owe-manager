@@ -103,6 +103,9 @@ export default function OweManager() {
     }
   };
 
+  const unpaidDebts = debts.filter((debt) => debt.status === "unpaid");
+  const paidDebts = debts.filter((debt) => debt.status === "paid");
+
   if (loading) return <div>Loading...</div>;
 
   return (
@@ -166,48 +169,71 @@ export default function OweManager() {
       </form>
 
       <div className="space-y-4">
-        <h2 className="text-xl font-bold border-b pb-2 text-center">
-          未返済リスト
-        </h2>
-        {debts.length === 0 ? (
-          <p className="text-center">現在、借金はありません！</p>
-        ) : (
-          debts.map((debt) => (
-            <div
-              key={debt.id}
-              className="p-4 border rounded-lg shadow-sm flex justify-between items-center"
-            >
-              <div>
-                <p className="font-bold text-gray-900 py-1">{debt.title}</p>
-                <p className="text-xl font-bold py-1">
-                  金額： <span className="text-red-500">{debt.amount}円</span>
-                </p>
-                <p className="text-sm text-gray-500 font-bold py-1">
-                  貸主： {debt.creditor}さん/ 期限： {debt.dueDate || "未設定"}
-                </p>
+          <h2 className="text-xl font-bold border-b pb-2 text-center">
+            未返済：
+            <span>({unpaidDebts.length})</span>
+          </h2>
+          {unpaidDebts.length === 0 ? (
+            <p className="text-center">現在、借金はありません！</p>
+          ) : (
+            unpaidDebts.map((debt) => (
+              <div
+                key={debt.id}
+                className="p-4 border rounded-lg shadow-sm flex justify-between items-center"
+              >
                 <div>
-                  <button
-                    onClick={() => handleEdit(debt)}
-                    className="text-xs bg-blue-500 text-white px-2 py-1 mr-2 mt-2 rounded hover:bg-blue-400"
-                  >
-                    編集
-                  </button>
-                  <button
-                    onClick={() => handleDelete(debt.id)}
-                    className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-400"
-                  >
-                    削除
-                  </button>
-                  <button
-                    onClick={() => handleTogglePay(debt)}
-                    className={`px-3 py-1 ml-2 text-white rounded-full text-xs font-bold transition-colors ${debt.status === "paid" ? "bg-green-500 text-green-700 hover:bg-green-400" : "bg-gray-600 hover:bg-indigo-100 hover:text-indigo-700"}`}
-                  >
-                    {debt.status === "paid" ? "完了" : "返済完了にする"}
-                  </button>
+                  <p className="font-bold text-gray-900 py-1">{debt.title}</p>
+                  <p className="text-xl font-bold py-1">
+                    金額： <span className="text-red-500">{debt.amount}円</span>
+                  </p>
+                  <p className="text-sm text-gray-500 font-bold py-1">
+                    貸主： {debt.creditor}さん/ 期限：{" "}
+                    {debt.dueDate || "未設定"}
+                  </p>
+                  <div>
+                    <button
+                      onClick={() => handleEdit(debt)}
+                      className="text-xs bg-blue-500 text-white px-2 py-1 mr-2 mt-2 rounded hover:bg-blue-400"
+                    >
+                      編集
+                    </button>
+                    <button
+                      onClick={() => handleDelete(debt.id)}
+                      className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-400"
+                    >
+                      削除
+                    </button>
+                    <button
+                      onClick={() => handleTogglePay(debt)}
+                      className={`px-3 py-1 ml-2 text-white rounded-full text-xs font-bold transition-colors ${debt.status === "paid" ? "bg-green-500 text-green-700 hover:bg-green-400" : "bg-gray-600 hover:bg-indigo-100 hover:text-indigo-700"}`}
+                    >
+                      {debt.status === "paid" ? "完了" : "返済完了にする"}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))
+          )}
+
+        {paidDebts.length > 0 && (
+          <section>
+            <h2 className="text-xl font-bold border-b pb-2 text-center">
+              返済済み：
+              <span>({paidDebts.length})</span>
+            </h2>
+          <div >
+            {paidDebts.map((debt) => (
+              <div key={debt.id} className="p-4 border rounded-lg shadow-sm flex justify-between items-center m-3">
+                <div>
+                  <p className="font-bold text-gray-900 py-1">{debt.title}</p>
+                  <p className="text-xl font-bold">金額：{debt.amount}円</p>
+                  <p className="text-sm text-gray-500 py-1">貸主：{debt.creditor}さん</p>
+                </div>
+                <button onClick={() => handleTogglePay(debt)} className="text-xs bg-gray-700 text-white px-2 py-1 rounded hover:bg-gray-400">戻す</button>
+              </div>
+            ))}
+          </div>
+          </section>
         )}
       </div>
     </div>
