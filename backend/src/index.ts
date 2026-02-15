@@ -84,5 +84,19 @@ const routes = app.basePath('/api')
   return c.json({ success: true })
 })
 
+// 返済完了ステータスの更新
+.patch('/debts/:id/pay', async (c) => {
+  const db = drizzle(c.env.DB)
+  const id = c.req.param('id')
+  const body = await c.req.json<{ status: 'paid' | 'unpaid' }>()
+
+  await db.update(debts)
+    .set({ status: body.status })
+    .where(eq(debts.id, id))
+    .run()
+
+  return c.json({ success: true })
+})
+
 export type AppType = typeof routes
 export default app
