@@ -104,14 +104,27 @@ export default function OweManager() {
   };
 
   const unpaidDebts = debts.filter((debt) => debt.status === "unpaid");
+
   const paidDebts = debts.filter((debt) => debt.status === "paid");
+
+  const totalAmount = unpaidDebts.reduce((sum, debt) => sum + debt.amount, 0);
 
   if (loading) return <div>Loading...</div>;
 
   return (
     <div className="max-w-xl mx-auto ">
-      <h1 className="text-3xl font-bold text-center py-5">借金管理アプリ</h1>
-      <p className="text-center text-gray-500">一刻でも早く返済してください</p>
+      <h1 className="text-3xl font-bold text-center py-5">OweManager</h1>
+      <p className="text-center text-gray-500">「誰に、いくら、いつまでに」返すべきかを明確に</p>
+      <section className="mt-3 mb-3 p-6 rounded-2xl text-center">
+        <h2 className="font-bold uppercase tracking-widest mb-1">現在の合計未返済額</h2>
+        <div className="text-4xl font-bold">
+          {totalAmount.toLocaleString()}円
+        </div>
+        <div className="mt-2 text-gray-700">
+          残り<span className="font-bold">{unpaidDebts.length}件</span>の借金があります。
+        </div>
+      </section>
+
       <form
         onSubmit={editingId ? handleUpdate : handleSubmit}
         className="p-6 bg-gray-50 rounded-xl space-y-4 shadow-sm my-6"
@@ -123,7 +136,7 @@ export default function OweManager() {
           <input
             className="border p-2 rounded"
             type="text"
-            placeholder="何のお金？"
+            placeholder="タイトル"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
