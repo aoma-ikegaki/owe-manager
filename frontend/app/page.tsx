@@ -121,7 +121,7 @@ export default function OweManager() {
           {totalAmount.toLocaleString()}円
         </div>
         <div className="mt-2 text-gray-700">
-          残り<span className="font-bold">{unpaidDebts.length}件</span>の借金があります。
+          残り<span className="font-bold text-red-500 text-lg">{unpaidDebts.length}件</span>の借金があります
         </div>
       </section>
 
@@ -208,7 +208,7 @@ export default function OweManager() {
                   <p className="text-xl font-bold py-1">
                     金額： <span className="text-red-500">{debt.amount}円</span>
                   </p>
-                  <p className="text-sm text-gray-500 font-bold py-1">
+                  <p className="text-sm text-gray-600 font-bold py-1">
                     貸主： {debt.creditor}さん / 期限：{" "}
                     {debt.dueDate || "未設定"}
                   </p>
@@ -248,11 +248,11 @@ export default function OweManager() {
             {paidDebts.map((debt) => (
               <div key={debt.id} className="p-4 border rounded-lg shadow-sm flex justify-between items-center m-3">
                 <div>
-                  <p className="font-bold text-gray-900 py-1">{debt.title}</p>
-                  <p className="text-xl font-bold">金額：{debt.amount}円</p>
-                  <p className="text-sm text-gray-500 py-1">貸主：{debt.creditor}さん</p>
+                  <p className="font-bold text-gray-600 py-1">{debt.title}</p>
+                  <p className="text-xl font-bold text-gray-600">金額：{debt.amount}円</p>
+                  <p className="text-sm text-gray-600 py-1">貸主：{debt.creditor}さん</p>
                 </div>
-                <button onClick={() => handleTogglePay(debt)} className="text-xs bg-gray-700 text-white px-2 py-1 rounded hover:bg-gray-400">戻す</button>
+                <button onClick={() => handleTogglePay(debt)} className="text-xs bg-gray-700 text-white px-2 py-1 rounded hover:bg-gray-500">戻す</button>
               </div>
             ))}
           </div>
