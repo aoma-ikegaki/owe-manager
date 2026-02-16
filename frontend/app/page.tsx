@@ -113,9 +113,9 @@ export default function OweManager() {
 
   return (
     <div className="max-w-xl mx-auto ">
-      <h1 className="text-3xl font-bold text-center py-5">OweManager</h1>
+      <h1 className="text-4xl font-bold text-center py-5 ">OweManager</h1>
       <p className="text-center text-gray-500">「誰に、いくら、いつまでに」返すべきかを明確に</p>
-      <section className="mt-3 mb-3 p-6 rounded-2xl text-center">
+      <section className="mt-3 mb-3 p-4 rounded-2xl text-center bg-gray-50 shadow-sm rounded-xl">
         <h2 className="font-bold uppercase tracking-widest mb-1">現在の合計未返済額</h2>
         <div className="text-4xl font-bold">
           {totalAmount.toLocaleString()}円
@@ -189,18 +189,27 @@ export default function OweManager() {
           {unpaidDebts.length === 0 ? (
             <p className="text-center">現在、借金はありません！</p>
           ) : (
-            unpaidDebts.map((debt) => (
+            unpaidDebts.map((debt) => {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+
+              const dueDate = debt.dueDate ? new Date(debt.dueDate) : null;
+              const isOverdue = dueDate && dueDate < today;
+
+              return (
               <div
                 key={debt.id}
                 className="p-4 border rounded-lg shadow-sm flex justify-between items-center"
               >
                 <div>
                   <p className="font-bold text-gray-900 py-1">{debt.title}</p>
+                  {isOverdue && (
+                    <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">期限切れ</span>)}
                   <p className="text-xl font-bold py-1">
                     金額： <span className="text-red-500">{debt.amount}円</span>
                   </p>
                   <p className="text-sm text-gray-500 font-bold py-1">
-                    貸主： {debt.creditor}さん/ 期限：{" "}
+                    貸主： {debt.creditor}さん / 期限：{" "}
                     {debt.dueDate || "未設定"}
                   </p>
                   <div>
@@ -225,7 +234,8 @@ export default function OweManager() {
                   </div>
                 </div>
               </div>
-            ))
+            )
+            })
           )}
 
         {paidDebts.length > 0 && (
