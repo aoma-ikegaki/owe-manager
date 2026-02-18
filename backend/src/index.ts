@@ -3,6 +3,9 @@ import { cors } from 'hono/cors'
 import { drizzle } from 'drizzle-orm/d1'
 import { debts } from './db/schema'
 import { eq } from 'drizzle-orm'
+import { zValidator } from '@hono/zod-validator'
+import { insertDebtSchema } from './db/schema'
+
 
 type Bindings = {
   DB: D1Database
@@ -23,15 +26,10 @@ const routes = app.basePath('/api')
 })
 
 // 作成
-.post('/debts', async (c) => {
-  const db = drizzle(c.env.DB)
+.post('/debts', zValidator('json', insertDebtSchema), async (c) => {
+  const body = c.req.valid('json')
 
-  const body = await c.req.json<{
-    title: string;
-    amount: number;
-    creditor: string;
-    dueDate: string;
-  }>()
+  const db = drizzle(c.env.DB)
 
   const newDebt = {
     id: crypto.randomUUID(),
@@ -49,15 +47,10 @@ const routes = app.basePath('/api')
 })
 
 // 更新
-.put('/debts/:id', async (c) => {
+.put('/debts/:id', zValidator('json', insertDebtSchema), async (c) => {
   const db = drizzle(c.env.DB)
   const id = c.req.param('id')
-  const body = await c.req.json<{
-    title: string;
-    amount: number;
-    creditor: string;
-    dueDate?: string;
-  }>()
+  const body = c.req.valid('json')
 
   await db.update(debts)
     .set({

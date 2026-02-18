@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { client } from "@/lib/api";
 import type { Debt } from "../../backend/src/db/schema";
+import { insertDebtSchema } from "@/lib/schemas";
 
 export default function OweManager() {
   const [debts, setDebts] = useState<Debt[]>([]);
@@ -38,13 +39,20 @@ export default function OweManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const result = insertDebtSchema.safeParse({
+      title,
+      amount: Number(amount),
+      creditor,
+      dueDate: dueDate || undefined,
+    });
+
+    if (!result.success) {
+      alert(result.error.issues[0].message);
+      return;
+    }
+
     const res = await client.api.debts.$post({
-      json: {
-        title,
-        amount: Number(amount),
-        creditor,
-        dueDate: dueDate || undefined,
-      },
+      json: result.data,
     });
 
     if (res.ok) {
@@ -66,6 +74,18 @@ export default function OweManager() {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingId) return;
+
+    const result = insertDebtSchema.safeParse({
+      title,
+      amount: Number(amount),
+      creditor,
+      dueDate: dueDate || undefined,
+    });
+
+    if (!result.success) {
+      alert(result.error.issues[0].message);
+      return;
+    }
 
     // バックエンドにPUTリクエストを送る
     const res = await client.api.debts[":id"].$put({
