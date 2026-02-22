@@ -3,6 +3,7 @@ import { cors } from 'hono/cors'
 import { drizzle } from 'drizzle-orm/d1'
 import { debts } from './db/schema'
 import { eq } from 'drizzle-orm'
+import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { insertDebtSchema } from './db/schema'
 
@@ -15,13 +16,16 @@ const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('/api/*', cors({
   origin: (origin) => {
-    if (origin === 'http://localhost:3000' || origin.endsWith('.pages.dev')) {
+    // 開発環境と、本番環境（.pages.dev で終わるすべてのドメイン）を許可
+    if (!origin || origin === 'http://localhost:3000' || origin.endsWith('.pages.dev')) {
       return origin;
     }
     return 'http://localhost:3000';
   },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'], // Content-Type を確実に許可
 }))
+
 const routes = app.basePath('/api')
 
 // 取得
@@ -85,18 +89,18 @@ const routes = app.basePath('/api')
 })
 
 // 返済完了ステータスの更新
-.patch('/debts/:id/pay', async (c) => {
-  const db = drizzle(c.env.DB)
-  const id = c.req.param('id')
-  const body = await c.req.json<{ status: 'paid' | 'unpaid' }>()
+  .patch('/debts/:id/pay', zValidator('json', z.object({ status: z.enum(['paid', 'unpaid']),})), async (c) => {
+    const id = c.req.param('id')
+    const { status } = c.req.valid('json')
+    const db = drizzle(c.env.DB)
 
-  await db.update(debts)
-    .set({ status: body.status })
-    .where(eq(debts.id, id))
-    .run()
+    await db.update(debts)
+      .set({ status })
+      .where(eq(debts.id, id))
+      .run()
 
-  return c.json({ success: true })
-})
+    return c.json({ success: true })
+  })
 
 export type AppType = typeof routes
 export default app
