@@ -13,8 +13,15 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-app.use('*', cors())
-
+app.use('/api/*', cors({
+  origin: (origin) => {
+    if (origin === 'http://localhost:3000' || origin.endsWith('.pages.dev')) {
+      return origin;
+    }
+    return 'http://localhost:3000';
+  },
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+}))
 const routes = app.basePath('/api')
 
 // 取得
