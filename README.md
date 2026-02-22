@@ -11,4 +11,9 @@
 | Backend | Hono, Cloudflare Workers |
 | Database | Cloudflare D1(SQLite), Drizzle ORM |
 
+## 主な機能
+- 借金の表示・登録・編集・削除（CRUD）
+- 返済のステータス更新
+- 現在の合計借金額表示
+- 未返済/返済済みの一覧表示
 
