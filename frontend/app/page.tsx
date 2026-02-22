@@ -79,9 +79,16 @@ export default function OweManager() {
 
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: "paid" | "unpaid" }) => {
-      return await client.api.debts[":id"].pay.$patch({
-        param: { id },
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
+      const res = await fetch(`${baseUrl}/api/debts/${id}/pay`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
       });
+      if (!res.ok) {
+        throw new Error("ステータスの更新に失敗しました");
+      }
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["debts"] });
