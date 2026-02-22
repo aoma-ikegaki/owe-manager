@@ -50,7 +50,7 @@ export default function OweManager() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, json }: { id: string; json: any }) => {
+    mutationFn: async ({ id, json }: { id: string; json: InsertDebt }) => {
       return await client.api.debts[":id"].$put({
         param: { id },
         json: json,
@@ -81,7 +81,6 @@ export default function OweManager() {
     mutationFn: async ({ id, status }: { id: string; status: "paid" | "unpaid" }) => {
       return await client.api.debts[":id"].pay.$patch({
         param: { id },
-        json: { status },
       });
     },
     onSuccess: () => {
