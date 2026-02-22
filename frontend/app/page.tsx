@@ -3,8 +3,9 @@
 import React, { useState } from "react";
 import { client } from "@/lib/api";
 import type { Debt } from "../../backend/src/db/schema";
-import { insertDebtSchema } from "@/lib/schemas";
+import { InsertDebt, insertDebtSchema } from "@/lib/schemas";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export default function OweManager() {
   const queryClient = useQueryClient();
@@ -33,13 +34,19 @@ export default function OweManager() {
   };
 
   const createMutation = useMutation({
-    mutationFn: async (newData: any) => {
-      return await client.api.debts.$post({ json: newData });
+    mutationFn: async (newData: InsertDebt) => {
+      const res = await client.api.debts.$post({ json: newData });
+      if (!res.ok) throw new Error("作成に失敗しました");
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["debts"] });
+      toast.success("借金が登録されました");
       clearForm();
     },
+    onError: () => {
+      toast.error("登録できませんでした。入力内容を確認してください。");
+    } 
   });
 
   const updateMutation = useMutation({
@@ -57,11 +64,17 @@ export default function OweManager() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await client.api.debts[":id"].$delete({ param: { id } });
+      const res = await client.api.debts[":id"].$delete({ param: { id } });
+      if (!res.ok) throw new Error("削除に失敗しました");
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["debts"] });
+      toast.success("削除が完了しました");
     },
+    onError: (error) => {
+      toast.error(error.message);
+    }
   });
 
   const toggleStatusMutation = useMutation({
