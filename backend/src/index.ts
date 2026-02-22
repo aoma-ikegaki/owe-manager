@@ -5,7 +5,7 @@ import { debts } from './db/schema'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
-import { insertDebtSchema } from './db/schema'
+import { insertDebtSchema } from '../../shared/schemas'
 
 
 type Bindings = {
@@ -16,14 +16,13 @@ const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('/api/*', cors({
   origin: (origin) => {
-    // 開発環境と、本番環境（.pages.dev で終わるすべてのドメイン）を許可
     if (!origin || origin === 'http://localhost:3000' || origin.endsWith('.pages.dev')) {
       return origin;
     }
     return 'http://localhost:3000';
   },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'], // Content-Type を確実に許可
+  allowHeaders: ['Content-Type', 'Authorization'], 
 }))
 
 const routes = app.basePath('/api')
