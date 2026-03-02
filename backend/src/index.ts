@@ -6,13 +6,19 @@ import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { insertDebtSchema } from '../../shared/schemas'
-
+import { getAuth } from './lib/auth'
 
 type Bindings = {
   DB: D1Database
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
+
+// Better Authのエンドポイントを追加
+app.on(["POST", "GET"], "/api/auth/*", (c) => {
+  const auth = getAuth(c.env.DB);
+  return auth.handler(c.req.raw);
+})
 
 app.use('/api/*', cors({
   origin: (origin) => {
