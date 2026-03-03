@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "pages:build": "npx @cloudflare/next-on-pages"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.21",
+    "better-auth": "^1.5.1",
     "hono": "^4.11.9",
     "next": "16.1.6",
     "react": "19.2.3",

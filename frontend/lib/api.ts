@@ -9,6 +9,20 @@
 import { hc } from 'hono/client'
 import type { AppType } from '../../backend/src/index'
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787' //開発時はローカルのHonoサーバーにリクエスト、本番環境では環境変数を使って、Cloudflare Workers上の本番URLへリクエストする
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787'
 
-export const client = hc<AppType>(baseURL)
+// fetch をラップして credentials を強制的に付与する関数を作成
+const fetchWithCredentials = (input: RequestInfo | URL, init?: RequestInit) => {
+  return fetch(input, {
+    ...init,
+    credentials: 'include', // Cookieを含める
+  })
+}
+
+export const client = hc<AppType>(BASE_URL, {
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  // fetch プロパティに自作関数を割り当てる
+  fetch: fetchWithCredentials, 
+})

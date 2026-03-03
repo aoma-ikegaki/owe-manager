@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { drizzle } from 'drizzle-orm/d1'
 import { debts } from './db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { insertDebtSchema } from '../../shared/schemas'
@@ -14,38 +14,61 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-// Better Authのエンドポイントを追加
-app.on(["POST", "GET"], "/api/auth/*", (c) => {
-  const auth = getAuth(c.env.DB);
-  return auth.handler(c.req.raw);
-})
-
-app.use('/api/*', cors({
+app.use('*', cors({
   origin: (origin) => {
-    if (!origin || origin === 'http://localhost:3000' || origin.endsWith('.pages.dev')) {
-      return origin;
-    }
+    if (!origin) return 'http://localhost:3000';
+
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://owe-manager-web.pages.dev',
+      'https://owe-manager-frontend-aoma-dev.pages.dev',
+      'https://owe-manager-frontend-aoma-dev.workers.dev',
+    ];
+
+    if (allowedOrigins.includes(origin)) return origin;
+    if (origin.endsWith('.owe-manager-web.pages.dev')) return origin;
+
     return 'http://localhost:3000';
   },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'], 
+  allowHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  credentials: true, 
 }))
+
+// Better Authのエンドポイントを追加
+app.on(["POST", "GET"], "/api/auth/*", (c) => {
+  const auth = getAuth(c.env.DB, c.env);
+  return auth.handler(c.req.raw);
+})
 
 const routes = app.basePath('/api')
 
 // 取得
 .get('/debts', async (c) => {
   const db = drizzle(c.env.DB)
+  const auth = getAuth(c.env.DB, c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
-  const allDebts = await db.select().from(debts).all()
+  if (!session) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+  
+  const allDebts = await db.select().from(debts).where(eq(debts.userId, session.user.id)).all()
   return c.json(allDebts)
 })
 
 // 作成
 .post('/debts', zValidator('json', insertDebtSchema), async (c) => {
   const body = c.req.valid('json')
-
   const db = drizzle(c.env.DB)
+
+  const auth = getAuth(c.env.DB, c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+  if (!session) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
 
   const newDebt = {
     id: crypto.randomUUID(),
@@ -54,6 +77,7 @@ const routes = app.basePath('/api')
     creditor: body.creditor,
     dueDate: body.dueDate || null,
     status: 'unpaid' as const,
+    userId: session.user.id, 
     createdAt: new Date(),
   }
 
@@ -68,6 +92,13 @@ const routes = app.basePath('/api')
   const id = c.req.param('id')
   const body = c.req.valid('json')
 
+  const auth = getAuth(c.env.DB, c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  
+  if (!session) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
   await db.update(debts)
     .set({
       title: body.title,
@@ -75,7 +106,7 @@ const routes = app.basePath('/api')
       creditor: body.creditor,
       dueDate: body.dueDate || null,
     })
-    .where(eq(debts.id, id))
+    .where(and(eq(debts.id, id), eq(debts.userId, session.user.id)))
     .run()
   
   return c.json({ success: true })
@@ -86,8 +117,15 @@ const routes = app.basePath('/api')
   const db = drizzle(c.env.DB)
   const id = c.req.param('id')
  
+  const auth = getAuth(c.env.DB, c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  
+  if (!session) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
   await db.delete(debts)
-    .where(eq(debts.id, id))
+    .where(and(eq(debts.id, id), eq(debts.userId, session.user.id)))
     .run()
 
   return c.json({ success: true })
@@ -99,9 +137,16 @@ const routes = app.basePath('/api')
     const { status } = c.req.valid('json')
     const db = drizzle(c.env.DB)
 
+    const auth = getAuth(c.env.DB, c.env);
+    const session = await auth.api.getSession({ headers: c.req.raw.headers });
+    
+    if (!session) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
+
     await db.update(debts)
       .set({ status })
-      .where(eq(debts.id, id))
+      .where(and(eq(debts.id, id), eq(debts.userId, session.user.id)))
       .run()
 
     return c.json({ success: true })

@@ -1,4 +1,5 @@
 import { refreshToken } from "better-auth/api";
+import { is } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { id } from "zod/locales";
 
@@ -11,7 +12,9 @@ export const debts = sqliteTable('debts', {
   status: text('status', { enum: ['unpaid', 'paid', 'overdue'] })
   .notNull()
   .default('unpaid'),
-
+  userId: text('user_id')
+  .notNull()
+  .references(() => user.id),
   createdAt: integer('created_at', { mode: 'timestamp' })
   .notNull()
   .default(new Date()),
@@ -24,6 +27,7 @@ export const user = sqliteTable('user', {
   email: text('email').notNull().unique(),
   emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
   image: text('image'),
+  isAnonymous: integer('is_anonymous', { mode: 'boolean' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 });

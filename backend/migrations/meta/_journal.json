@@ -15,6 +15,20 @@
       "when": 1772466908519,
       "tag": "0001_perfect_nemesis",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1772511913299,
+      "tag": "0002_spicy_vargas",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1772522019059,
+      "tag": "0003_cuddly_warbound",
+      "breakpoints": true
     }
   ]
 }

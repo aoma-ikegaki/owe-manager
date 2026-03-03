@@ -1,22 +1,43 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { client } from "@/lib/api";
-import type { Debt } from "../../backend/src/db/schema";
+import type { Debt } from "@/types/debt";
 import { InsertDebt, insertDebtSchema } from "@/lib/schemas";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 export default function OweManager() {
   const queryClient = useQueryClient();
   
+  const [session, setSession] = useState<typeof authClient.$Infer.Session | null>(null);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const sessionData = await authClient.getSession();
+
+      if (!sessionData.data) {
+        await authClient.signIn.anonymous();
+        const newSession = await authClient.getSession();
+        setSession(newSession.data);
+        queryClient.invalidateQueries({ queryKey: ["debts"] });
+      } else {
+        setSession(sessionData.data);
+      }
+    };
+
+    initAuth();
+  }, [queryClient]);
+
   const { data: debts = [], isLoading } = useQuery({
-    queryKey: ["debts"],
+    queryKey: ["debts", session?.user?.id],
     queryFn: async () => {
       const res = await client.api.debts.$get();
       if (!res.ok) throw new Error("データの取得に失敗しました");
       return (await res.json()) as unknown as Debt[];
     },
+    enabled: !!session, 
   });
 
   const [title, setTitle] = useState("");
@@ -84,6 +105,7 @@ export default function OweManager() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
+        credentials: "include",
       });
       if (!res.ok) {
         throw new Error("ステータスの更新に失敗しました");
