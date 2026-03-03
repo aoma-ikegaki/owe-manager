@@ -2,7 +2,7 @@
 
 「誰に、いくら、いつまでに」返すべきかを明確にし、返済漏れを防ぐための個人向け債務管理アプリケーションです。
 
-[デモサイト] (https://8c81e92e.owe-manager-web.pages.dev/)
+[デモサイト] (https://9e3a0280.owe-manager-web.pages.dev)
 
 ## 技術スタック
 | カテゴリ | 技術 |
@@ -64,3 +64,4 @@ graph TD
     style CZod fill:#fff9c4,stroke:#fbc02d
 
     style BZod fill:#fff9c4,stroke:#fbc02d
+
