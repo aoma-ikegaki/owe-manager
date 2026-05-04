@@ -23,10 +23,12 @@ app.use('*', cors({
       'https://owe-manager-web.pages.dev',
       'https://owe-manager-frontend-aoma-dev.pages.dev',
       'https://owe-manager-frontend-aoma-dev.workers.dev',
+      'https://owe-manager-frontend.pages.dev',
     ];
 
     if (allowedOrigins.includes(origin)) return origin;
     if (origin.endsWith('.owe-manager-web.pages.dev')) return origin;
+    if (origin.endsWith('.owe-manager-frontend.pages.dev')) return origin;
 
     return 'http://localhost:3000';
   },
