@@ -31,6 +31,7 @@ export const getAuth = (db: D1Database, env: any) => {
       "https://owe-manager-web.pages.dev",
       "https://8c81e92e.owe-manager-web.pages.dev",
       "https://owe-manager-frontend-aoma-dev.pages.dev",
+      "https://owe-manager.pages.dev",
     ],
   });
 };
