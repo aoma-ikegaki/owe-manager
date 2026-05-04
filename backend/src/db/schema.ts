@@ -1,7 +1,4 @@
-import { refreshToken } from "better-auth/api";
-import { is } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
-import { id } from "zod/locales";
 
 export const debts = sqliteTable('debts', {
   id: text('id').primaryKey(),
