@@ -12,23 +12,17 @@ export default function OweManager() {
   const queryClient = useQueryClient();
   
   const [session, setSession] = useState<typeof authClient.$Infer.Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     const initAuth = async () => {
       const sessionData = await authClient.getSession();
-
-      if (!sessionData.data) {
-        await authClient.signIn.anonymous();
-        const newSession = await authClient.getSession();
-        setSession(newSession.data);
-        queryClient.invalidateQueries({ queryKey: ["debts"] });
-      } else {
-        setSession(sessionData.data);
-      }
+      setSession(sessionData.data);
+      setAuthLoading(false);
     };
 
     initAuth();
-  }, [queryClient]);
+  }, []);
 
   const { data: debts = [], isLoading } = useQuery({
     queryKey: ["debts", session?.user?.id],
@@ -184,11 +178,60 @@ export default function OweManager() {
 
   const totalAmount = unpaidDebts.reduce((sum, debt) => sum + debt.amount, 0);
 
+  const handleGoogleLogin = async () => {
+    const { error } = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: window.location.origin + "/",
+    });
+    if (error) {
+      toast.error(`ログインエラー: ${error.message}`);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await authClient.signOut();
+    setSession(null);
+  };
+
+  if (authLoading) return <div className="p-10 text-center">Loading...</div>;
+
+  if (!session) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="bg-white rounded-2xl shadow-md p-10 flex flex-col items-center gap-6 w-full max-w-sm">
+          <h1 className="text-3xl font-bold text-gray-900">OweManager</h1>
+          <p className="text-gray-500 text-center text-sm">「誰に、いくら、いつまでに」返すべきかを明確に</p>
+          <button
+            onClick={handleGoogleLogin}
+            className="flex items-center gap-3 bg-white border border-gray-300 text-gray-700 font-semibold px-6 py-3 rounded-lg shadow-sm hover:bg-gray-50 hover:shadow transition-all w-full justify-center"
+          >
+            <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              <path fill="none" d="M0 0h48v48H0z"/>
+            </svg>
+            Googleでログイン
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) return <div className="p-10 text-center">Loading...</div>;
 
   return (
     <div className="max-w-xl mx-auto ">
-      <h1 className="text-4xl font-bold text-center py-5 ">OweManager</h1>
+      <div className="flex justify-between items-center py-5">
+        <h1 className="text-4xl font-bold">OweManager</h1>
+        <button
+          onClick={handleSignOut}
+          className="text-sm text-gray-500 hover:text-gray-700 underline"
+        >
+          ログアウト
+        </button>
+      </div>
       <p className="text-center text-gray-500">「誰に、いくら、いつまでに」返すべきかを明確に</p>
       <section className="mt-3 mb-3 p-4 rounded-2xl text-center bg-gray-50 shadow-sm rounded-xl">
         <h2 className="font-bold uppercase tracking-widest mb-1">現在の合計未返済額</h2>

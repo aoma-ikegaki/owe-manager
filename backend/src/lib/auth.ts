@@ -1,6 +1,5 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { anonymous } from 'better-auth/plugins';
 import * as schema from '../db/schema';
 import { D1Database } from '@cloudflare/workers-types';
 import { drizzle } from 'drizzle-orm/d1';
@@ -20,10 +19,12 @@ export const getAuth = (db: D1Database, env: any) => {
       },
     },
     baseURL: env.BETTER_AUTH_URL || "http://localhost:8787/api/auth",
-    plugins: [
-      anonymous()
-    ],
-
+    socialProviders: {
+      google: {
+        clientId: env.GOOGLE_CLIENT_ID as string,
+        clientSecret: env.GOOGLE_CLIENT_SECRET as string,
+      },
+    },
     secret: env.BETTER_AUTH_SECRET || "BETTER_AUTH_SECRET_ANY_STRING_AT_LEAST_32_CHARS",
     trustedOrigins: [
       "http://localhost:3000",
